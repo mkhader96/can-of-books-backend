@@ -8,8 +8,9 @@ const mongoose = require("mongoose");
 server.use(cors());
 const booksModel = require("./Modules/BookModule");
 const PORT = process.env.PORT || 3001;
+server.use(express.json())
 
-mongoose.connect("mongodb://localhost:27017/Books2", {
+mongoose.connect(process.env.DB_LINK, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
@@ -20,6 +21,8 @@ mongoose.connect("mongodb://localhost:27017/Books2", {
 server.get("/", homeHandler);
 server.get("test", testHandler);
 server.get("/books", getBooks);
+server.post('/addBook',addBooks);
+server.delete('/deleteBook/:id',deleteBooks);
 server.get("*", defaultHandler);
 
 function homeHandler(req, res) {
@@ -30,9 +33,7 @@ function testHandler(req, res) {
   res.send("Test Route");
 }
 
-function defaultHandler(req, res) {
-  res.status(404).send("Not Found");
-}
+
 
 function getBooks(req, res) {
   booksModel.find({}, (error, booksData) => {
@@ -42,6 +43,46 @@ function getBooks(req, res) {
       res.send(booksData);
     }
   });
+}
+
+async function addBooks(req, res) {
+const title = req.body.title;
+const description = req.body.description;
+const status = req.body.status;
+  console.log(req.body);
+  await booksModel.create({
+    title: title,
+    description: description,
+    status: status,
+  });
+  booksModel.find({}, (error, booksData) => {
+    if (error) {
+      res.send(error);
+    } else {
+      res.send(booksData);
+      
+    }
+  });
+}
+function deleteBooks(req,res) {
+  const bookId = req.params.id;
+  booksModel.deleteOne({_id:bookId},(err,result)=>{
+      
+    booksModel.find({},(err,result)=>{
+          if(err)
+          {
+              console.log(err);
+          }
+          else
+          {
+              res.send(result);
+          }
+      })
+
+  })
+}
+function defaultHandler(req, res) {
+  res.status(404).send("Not Found");
 }
 
 server.listen(PORT, () => console.log(`listening on ${PORT}`));
