@@ -23,6 +23,7 @@ server.get("test", testHandler);
 server.get("/books", getBooks);
 server.post('/addBook',addBooks);
 server.delete('/deleteBook/:id',deleteBooks);
+server.put('/updateBook/:id',updateBooks);
 server.get("*", defaultHandler);
 
 function homeHandler(req, res) {
@@ -80,6 +81,28 @@ function deleteBooks(req,res) {
       })
 
   })
+}
+function updateBooks(req, res){
+  const id = req.params.id;
+  const {title,description,status} = req.body;
+
+  booksModel.findByIdAndUpdate(id, {title,description,status}, (err, result) => {
+    if(err){
+      console.log(err);
+    } else {
+      booksModel.find({},(err,result)=>{ 
+        if(err)
+        {
+            console.log(err);
+        }
+        else
+        {
+            res.send(result);
+        }
+    })
+    }
+  })
+
 }
 function defaultHandler(req, res) {
   res.status(404).send("Not Found");
