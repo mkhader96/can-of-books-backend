@@ -10,7 +10,7 @@ const booksModel = require("./Modules/BookModule");
 const PORT = process.env.PORT || 3001;
 server.use(express.json())
 
-mongoose.connect(process.env.DB_LINK, {
+mongoose.connect('mongodb://mkhader96:miasanmia5@ac-lunxney-shard-00-00.egnkgre.mongodb.net:27017,ac-lunxney-shard-00-01.egnkgre.mongodb.net:27017,ac-lunxney-shard-00-02.egnkgre.mongodb.net:27017/?ssl=true&replicaSet=atlas-m7ugiw-shard-0&authSource=admin&retryWrites=true&w=majority', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
@@ -23,6 +23,7 @@ server.get("test", testHandler);
 server.get("/books", getBooks);
 server.post('/addBook',addBooks);
 server.delete('/deleteBook/:id',deleteBooks);
+server.put('/updateBook/:id',updateBooks);
 server.get("*", defaultHandler);
 
 function homeHandler(req, res) {
@@ -80,6 +81,28 @@ function deleteBooks(req,res) {
       })
 
   })
+}
+function updateBooks(req, res){
+  const id = req.params.id;
+  const {title,description,status} = req.body;
+
+  booksModel.findByIdAndUpdate(id, {title,description,status}, (err, result) => {
+    if(err){
+      console.log(err);
+    } else {
+      booksModel.find({},(err,result)=>{ 
+        if(err)
+        {
+            console.log(err);
+        }
+        else
+        {
+            res.send(result);
+        }
+    })
+    }
+  })
+
 }
 function defaultHandler(req, res) {
   res.status(404).send("Not Found");
