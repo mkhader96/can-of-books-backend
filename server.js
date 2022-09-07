@@ -37,12 +37,14 @@ function testHandler(req, res) {
 
 
 function getBooks(req, res) {
-  booksModel.find({}, (error, booksData) => {
+  const email = req.query.email;
+  booksModel.find({email:email}, (error, booksData) => {
     if (error) {
       res.send(error);
     } else {
       res.send(booksData);
-    }
+    } 
+
   });
 }
 
@@ -50,13 +52,14 @@ async function addBooks(req, res) {
 const title = req.body.title;
 const description = req.body.description;
 const status = req.body.status;
-  console.log(req.body);
+const email = req.body.email;
   await booksModel.create({
     title: title,
     description: description,
     status: status,
+    email: email,
   });
-  booksModel.find({}, (error, booksData) => {
+  booksModel.find({email:email}, (error, booksData) => {
     if (error) {
       res.send(error);
     } else {
@@ -67,9 +70,10 @@ const status = req.body.status;
 }
 function deleteBooks(req,res) {
   const bookId = req.params.id;
+  const email = req.query.email;
   booksModel.deleteOne({_id:bookId},(err,result)=>{
       
-    booksModel.find({},(err,result)=>{
+    booksModel.find({email:email},(err,result)=>{
           if(err)
           {
               console.log(err);
@@ -85,12 +89,13 @@ function deleteBooks(req,res) {
 function updateBooks(req, res){
   const id = req.params.id;
   const {title,description,status} = req.body;
+  const email = req.body.email;
 
-  booksModel.findByIdAndUpdate(id, {title,description,status}, (err, result) => {
+  booksModel.findByIdAndUpdate(id, {title,description,status,email}, (err, result) => {
     if(err){
       console.log(err);
     } else {
-      booksModel.find({},(err,result)=>{ 
+      booksModel.find({email:email},(err,result)=>{ 
         if(err)
         {
             console.log(err);
